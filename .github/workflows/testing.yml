@@ -10,7 +10,7 @@ on:
 
 jobs:
   test-run:
-    runs-on: ubuntu
+    runs-on: ubuntu-latest
     steps:
       - name: Set up MySQL
         uses: mirromutth/mysql-action@v1.1
