@@ -1,29 +1,36 @@
 name: test
-on: 
-  push: [main]
-jobs: 
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
   test-run:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu
     steps:
-    - name: Set up MySQL
-      uses: mirromutth/mysql-action@v1.1
-      with:
-        mysql version: '8.0'
-        mysql user: 'root'
+      - name: Set up MySQL
+        uses: mirromutth/mysql-action@v1.1
+        with:
+          mysql version: '8.0'
+          mysql user: 'root'
 
-    - name: Setup PHP
-      uses: shivammathur/setup-php@v2
-      with:
-        php-version: '8.2.12'
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2.12'
 
-    - name: Install dependencies
-      uses: php-actions/composer@v6
-    
-    - name: create-database
-      run: symfony console d:d:c
-    
-    - name: migration-database
-      run: symfony console make:migration
+      - name: Install dependencies
+        uses: php-actions/composer@v6
 
-    - name: migrate
-      run: symfony console d:m:m
+      - name: create-database
+        run: symfony console d:d:c
+
+      - name: migration-database
+        run: symfony console make:migration
+
+      - name: migrate
+        run: symfony console d:m:m
