@@ -28,17 +28,24 @@ final class EditorController extends AbstractController
         $editor = new Editor();
         $form = $this->createForm(EditorType::class, $editor);
         $form->handleRequest($request);
+        $msg = '';
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $entityManager->persist($editor);
-            $entityManager->flush();
+            if(!empty($editor->getName())) {
+                $entityManager->persist($editor);
+                $entityManager->flush();
 
-            return $this->redirectToRoute('app_editor_index', [], Response::HTTP_SEE_OTHER);
+                return $this->redirectToRoute('app_editor_index', [], Response::HTTP_SEE_OTHER);
+            }
+                
+            $msg = 'Le champ doit être rempli';
+
         }
 
         return $this->render('editor/new.html.twig', [
             'editor' => $editor,
             'form' => $form,
+            'msg'=>$msg
         ]);
     }
 

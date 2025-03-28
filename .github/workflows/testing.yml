@@ -11,29 +11,69 @@ on:
 jobs:
   test-run:
     runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: app
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h localhost"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
     steps:
-      - name: Set up MySQL
-        uses: mirromutth/mysql-action@v1.1
-        with:
-          mysql version: '8.0'
-          mysql user: 'test'
-          mysql password: '1234'
+            # récupération du code du repository
+            - name: Checkout code
+              uses: actions/checkout@v4
 
-      - name: Setup PHP
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: '8.2.12'
+            # configuration de PHP
+            - name: Set up PHP
+              uses: shivammathur/setup-php@v2
+              with:
+                  php-version: "8.2"
+                  extensions: mbstring, intl, pdo_mysql, sodium
+                  tools: composer
 
-      - name: checkout-project
-        uses: actions/checkout@v4
+            # configuration de NodeJs
+            - name: Set up Node.js
+              uses: actions/setup-node@v4
+              with:
+                  node-version: "20"
 
-      - name: Install dependencies
-        uses: php-actions/composer@v6
+            # paramétrage de l'environnement de test
+            - name: Set up .env for CI
+              run: |
+                  cp .env .env.test
+                  echo "APP_ENV=test" >> .env
+                  echo "APP_ENV=test" >> .env.test
+                  echo "DATABASE_URL=mysql://root:root@127.0.0.1:3306/app" >> .env.test
 
-      - name: create-database
-        run: php bin/console d:d:c
+            # installation des dépendances Symfony
+            - name: Install PHP dependencies
+              run: composer install --no-interaction --prefer-dist
 
-      - name: migrate
-        run: php bin/console d:m:m
+            # migration de la base de données
+            - name: migration DB
+              run: |
+                  php bin/console d:d:c
+                  php bin/console d:m:m
 
-      
+            # installation des dépendance NodeJs
+            - name: Install JS dependencies
+              run: npm install
+
+            #- name: Build frontend (si applicable)
+            #run: npm run build --if-present
+
+            # démarrage du serveur Symfony
+            - name: Run Symfony local server
+              run: |
+                  php -S 127.0.0.1:8001 -t public &
+
+            # exécution des tests Cypress
+            - name: Run Cypress tests
+              run: npm run cypress:run
