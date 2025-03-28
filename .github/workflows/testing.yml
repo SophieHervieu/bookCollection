@@ -33,8 +33,7 @@ jobs:
       - name: create-database
         run: php bin/console d:d:c
 
-      - name: migration-database
-        run: php bin/console make:migration
-
       - name: migrate
         run: php bin/console d:m:m
+
+      
