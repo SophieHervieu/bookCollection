@@ -31,10 +31,10 @@ jobs:
         uses: php-actions/composer@v6
 
       - name: create-database
-        run: symfony console d:d:c
+        run: php bin/console d:d:c
 
       - name: migration-database
-        run: symfony console make:migration
+        run: php bin/console make:migration
 
       - name: migrate
-        run: symfony console d:m:m
+        run: php bin/console d:m:m
